@@ -31,5 +31,4 @@ public class UserDao {
     public User getUser(int id) {
         return em.find(User.class, id);
     }
-
 }
