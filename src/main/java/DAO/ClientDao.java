@@ -1,6 +1,6 @@
 package DAO;
 
-import jakarta.persistence.Entity;
+import Models.Client;
 import jakarta.persistence.EntityManager;
 
 public class ClientDao {
@@ -11,25 +11,25 @@ public class ClientDao {
         this.em = em;
     }
 
-    public void saveClient(Entity client) {
+    public void saveClient(Client client) {
         em.getTransaction().begin();
         em.persist(client);
         em.getTransaction().commit();
     }
 
-    public void updateClient(Entity client) {
+    public void updateClient(Client client) {
         em.getTransaction().begin();
         em.merge(client);
         em.getTransaction().commit();
     }
 
-    public void deleteClient(Entity client) {
+    public void deleteClient(Client client) {
         em.getTransaction().begin();
         em.remove(client);
         em.getTransaction().commit();
     }
 
-    public Entity getClient(int id) {
-        return em.find(Entity.class, id);
+    public Client getClient(int id) {
+        return em.find(Client.class, id);
     }
 }

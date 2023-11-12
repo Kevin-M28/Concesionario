@@ -10,9 +10,9 @@ import java.util.List;
 @Table(name = "clients")
 public class Client extends User {
     private String telephone;
-    /*
+
     @OneToMany(mappedBy = "client")
-    private List<Sale> sales_hisory;*/
+    private List<Sale> sales_hisory;
     public Client() {
         super();
         this.telephone = "";
@@ -30,7 +30,6 @@ public class Client extends User {
     public void setTelephone(String telephone) {
         this.telephone = telephone;
     }
-/*
     public List<Sale> getSales_hisory() {
         return sales_hisory;
     }
@@ -39,5 +38,4 @@ public class Client extends User {
         this.sales_hisory = sales_hisory;
     }
 
- */
 }
