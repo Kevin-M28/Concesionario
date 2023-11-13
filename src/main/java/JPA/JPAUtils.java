@@ -5,8 +5,6 @@ import jakarta.persistence.EntityManagerFactory;
 import jakarta.persistence.Persistence;
 
 public class JPAUtils implements AutoCloseable{
-
-
     private final EntityManagerFactory emf;
     private final EntityManager em;
 
