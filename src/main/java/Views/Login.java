@@ -26,16 +26,18 @@ public class Login extends JPanel {
                 frame.setSize(800,750);
                 frame.pack();
                 frame.setVisible(true);
+                ((Admin) frame.getContentPane()).setUser(usuario);
 
             } else if (usuario.getRole() == Role.CLIENT) {
                 JFrame frame = new JFrame("Main");
                 frame.setContentPane(new Cliente());
                 frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
                 frame.setSize(800,750);
+                ((Cliente) frame.getContentPane()).setCliente(new ClientDao(new JPAUtils().getEntityManager()).getClient(usuario.getId()));
+                ((Cliente) frame.getContentPane()).llenarTablaHisorial();
                 frame.pack();
                 frame.setVisible(true);
-                System.out.println(usuario.getId());
-                ((Cliente) frame.getContentPane()).setCliente(new ClientDao(new JPAUtils().getEntityManager()).getClient(usuario.getId()));
+
             }
         } catch (Exception e) {
             JOptionPane.showMessageDialog(null, "Usuario o contraseña incorrectos");

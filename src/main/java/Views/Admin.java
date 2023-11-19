@@ -6,51 +6,208 @@ import javax.swing.*;
 import javax.swing.GroupLayout;
 import javax.swing.table.*;
 
+import DAO.*;
+import JPA.JPAUtils;
+import Models.*;
+
+
 public class Admin extends JPanel {
     public Admin() {
         initComponents();
     }
 
+    public void setUser(User user){
+        this.user = user;
+        userName.setText(user.getUsername());
+    }
+    public void agregarCliente(){
+
+        ClientDao clientDao = new ClientDao(new JPAUtils().getEntityManager());
+        Client client = (idCliente.getText().isEmpty())? new Client(nombreCliente.getText(), txtcorreoCliente.getText(), contraCliente.getText(), Role.CLIENT, teltxt.getText()): clientDao.getClient(Integer.parseInt( idCliente.getText()));
+        if(idCliente.getText().isEmpty()){
+            clientDao.saveClient(client);
+            JOptionPane.showMessageDialog(null, "Cliente agregado");
+        }else{
+            //set de los nuevos atributos
+            client.setUsername(nombreCliente.getText());
+            client.setE_mail(txtcorreoCliente.getText());
+            client.setPassword(contraCliente.getText());
+            client.setTelephone(teltxt.getText());
+            clientDao.updateClient(client);
+            JOptionPane.showMessageDialog(null, "Cliente actualizado");
+        }
+        limpiarCliente();
+        tablaClientes();
+
+    }
+    public void agregarVehiculo(){
+        VehicleDao vehicleDao = new VehicleDao(new JPAUtils().getEntityManager());
+        Vehicle vehicle = (idCar.getText().isEmpty())? new Vehicle(modelCar.getText(), fabriCar.getText(), annoCar.getText(), carColor.getText(), Double.parseDouble(carPrice.getText()), Integer.parseInt(carStock.getText())): vehicleDao.getVehicle(Integer.parseInt(idCar.getText()));
+        if(idCar.getText().isEmpty()){
+            vehicleDao.saveVehicle(vehicle);
+            JOptionPane.showMessageDialog(null, "Vehiculo agregado");
+        }else{
+            //set de los nuevos atributos
+            vehicle.setModel(modelCar.getText());
+            vehicle.setFabricant(fabriCar.getText());
+            vehicle.setYear(annoCar.getText());
+            vehicle.setColor(carColor.getText());
+            vehicle.setPrice(Double.parseDouble(carPrice.getText()));
+            vehicle.setStock(Integer.parseInt(carStock.getText()));
+            vehicleDao.updateVehicle(vehicle);
+            JOptionPane.showMessageDialog(null, "Vehiculo actualizado");
+        }
+        limpiarVehiculo();
+        tablaVehiculos();
+    }
+    public void eliminarCliente(){
+        ClientDao clientDao = new ClientDao(new JPAUtils().getEntityManager());
+        if (idCliente.getText().isEmpty() || clientDao.getClient(Integer.parseInt(idCliente.getText())) == null) {
+            JOptionPane.showMessageDialog(null, "Cliente no encontrado o no ha seleccionado uno");
+        }else {
+            clientDao.deleteClient(clientDao.getClient(Integer.parseInt(idCliente.getText())));
+            JOptionPane.showMessageDialog(null, "Cliente eliminado");
+        }
+        limpiarCliente();
+        tablaClientes();
+    }
+    public void limpiarCliente(){
+        idCliente.setText("");
+        nombreCliente.setText("");
+        txtcorreoCliente.setText("");
+        contraCliente.setText("");
+        teltxt.setText("");
+    }
+    public void limpiarVehiculo(){
+        idCar.setText("");
+        modelCar.setText("");
+        fabriCar.setText("");
+        annoCar.setText("");
+        carColor.setText("");
+        carPrice.setText("");
+        carStock.setText("");
+    }
+    public void buscarClienteTabla(){
+        ClientDao clientDao = new ClientDao(new JPAUtils().getEntityManager());
+        Client client = clientDao.getClientNombre(nombreCliente.getText());
+        if (client != null) {
+            idCliente.setText(String.valueOf(client.getId()));
+            nombreCliente.setText(client.getUsername());
+            txtcorreoCliente.setText(client.getE_mail());
+            contraCliente.setText(client.getPassword());
+            teltxt.setText(client.getTelephone());
+        }else{
+            JOptionPane.showMessageDialog(null, "Cliente no encontrado");
+        }
+    }
+
+    public void eliminarVehiculo(){
+        VehicleDao vehicleDao = new VehicleDao(new JPAUtils().getEntityManager());
+        if (idCar.getText().isEmpty() || vehicleDao.getVehicle(Integer.parseInt(idCar.getText())) == null) {
+            JOptionPane.showMessageDialog(null, "Vehiculo no encontrado o no ha seleccionado uno");
+        }else {
+            vehicleDao.deleteVehicle(vehicleDao.getVehicle(Integer.parseInt(idCar.getText())));
+            JOptionPane.showMessageDialog(null, "Vehiculo eliminado");
+        }
+        limpiarVehiculo();
+        tablaVehiculos();
+    }
+    public void buscarVehiculoTabla(){
+        VehicleDao vehicleDao = new VehicleDao(new JPAUtils().getEntityManager());
+        Vehicle vehicle = vehicleDao.getVehiclebyModel(modelCar.getText());
+        if (vehicle != null) {
+            idCar.setText(String.valueOf(vehicle.getId()));
+            modelCar.setText(vehicle.getModel());
+            fabriCar.setText(vehicle.getFabricant());
+            annoCar.setText(vehicle.getYear());
+            carColor.setText(vehicle.getColor());
+            carPrice.setText(String.valueOf(vehicle.getPrice()));
+            carStock.setText(String.valueOf(vehicle.getStock()));
+        }else{
+            JOptionPane.showMessageDialog(null, "Vehiculo no encontrado");
+        }
+    }
+    public void tablaVentas(){
+        SaleDao saleDao = new SaleDao(new JPAUtils().getEntityManager());
+        DefaultTableModel model = (DefaultTableModel) list3.getModel();
+        model.setRowCount(0);
+        for (int i = 0; i < saleDao.getSales().size(); i++) {
+            model.addRow(new Object[]{saleDao.getSales().get(i).getClient().getUsername(), saleDao.getSales().get(i).getVehicle().getModel(), saleDao.getSales().get(i).getDate(), saleDao.getSales().get(i).getTotal(), saleDao.getSales().get(i).getPayment_method()});
+        }
+    }
+    public void tablaClientes(){
+        ClientDao clientDao = new ClientDao(new JPAUtils().getEntityManager());
+        DefaultTableModel model = (DefaultTableModel) table1.getModel();
+        model.setRowCount(0);
+        for (int i = 0; i < clientDao.getClients().size(); i++) {
+            model.addRow(new Object[]{clientDao.getClients().get(i).getId(), clientDao.getClients().get(i).getUsername(), clientDao.getClients().get(i).getE_mail(), clientDao.getClients().get(i).getPassword(), clientDao.getClients().get(i).getRole(), clientDao.getClients().get(i).getTelephone()});
+        }
+    }
+    public void tablaVehiculos(){
+        VehicleDao vehicleDao = new VehicleDao(new JPAUtils().getEntityManager());
+        DefaultTableModel model = (DefaultTableModel) table2.getModel();
+        model.setRowCount(0);
+        for (int i = 0; i < vehicleDao.getVehicles().size(); i++) {
+            model.addRow(new Object[]{vehicleDao.getVehicles().get(i).getId(), vehicleDao.getVehicles().get(i).getModel(), vehicleDao.getVehicles().get(i).getFabricant(), vehicleDao.getVehicles().get(i).getYear(), vehicleDao.getVehicles().get(i).getColor(), vehicleDao.getVehicles().get(i).getPrice(), vehicleDao.getVehicles().get(i).getStock()});
+        }
+    }
+    public void rellenaCamposconTablaCli(){
+        int row = table1.getSelectedRow();
+        idCliente.setText(table1.getModel().getValueAt(row, 0).toString());
+        nombreCliente.setText(table1.getModel().getValueAt(row, 1).toString());
+        txtcorreoCliente.setText(table1.getModel().getValueAt(row, 2).toString());
+        contraCliente.setText(table1.getModel().getValueAt(row, 3).toString());
+        roltxt.setText(table1.getModel().getValueAt(row, 4).toString());
+        teltxt.setText(table1.getModel().getValueAt(row, 5).toString());
+    }
+    public void rellenaCamposconTablaVeh(){
+        int row = table2.getSelectedRow();
+        idCar.setText(table2.getModel().getValueAt(row, 0).toString());
+        modelCar.setText(table2.getModel().getValueAt(row, 1).toString());
+        fabriCar.setText(table2.getModel().getValueAt(row, 2).toString());
+        annoCar.setText(table2.getModel().getValueAt(row, 3).toString());
+        carColor.setText(table2.getModel().getValueAt(row, 4).toString());
+        carPrice.setText(table2.getModel().getValueAt(row, 5).toString());
+        carStock.setText(table2.getModel().getValueAt(row, 6).toString());
+    }
+
     private void initComponents() {
+        user = new User();
         tabbedPane1 = new JTabbedPane();
         panel1 = new JPanel();
         label2 = new JLabel();
-        textField6 = new JTextField();
+        idCliente = new JTextField();
         label3 = new JLabel();
-        textField7 = new JTextField();
+        nombreCliente = new JTextField();
         label4 = new JLabel();
-        textField8 = new JTextField();
+        txtcorreoCliente = new JTextField();
         label5 = new JLabel();
-        textField9 = new JTextField();
+        contraCliente = new JTextField();
         label6 = new JLabel();
-        textField10 = new JTextField();
+        roltxt = new JTextField();
         label7 = new JLabel();
-        textField11 = new JTextField();
-        label8 = new JLabel();
-        textField12 = new JTextField();
+        teltxt = new JTextField();
         scrollPane2 = new JScrollPane();
         table1 = new JTable();
         button1 = new JButton();
         button2 = new JButton();
-        button3 = new JButton();
-        button4 = new JButton();
         button5 = new JButton();
         button6 = new JButton();
         panel2 = new JPanel();
         label12 = new JLabel();
-        textField15 = new JTextField();
+        idCar = new JTextField();
         label13 = new JLabel();
-        textField16 = new JTextField();
+        modelCar = new JTextField();
         label14 = new JLabel();
-        textField17 = new JTextField();
+        fabriCar = new JTextField();
         label15 = new JLabel();
-        textField18 = new JTextField();
+        annoCar = new JTextField();
         label16 = new JLabel();
-        textField19 = new JTextField();
+        carColor = new JTextField();
         label17 = new JLabel();
-        textField20 = new JTextField();
+        carPrice = new JTextField();
         label18 = new JLabel();
-        textField21 = new JTextField();
+        carStock = new JTextField();
         button7 = new JButton();
         button8 = new JButton();
         button9 = new JButton();
@@ -60,10 +217,15 @@ public class Admin extends JPanel {
         panel3 = new JPanel();
         label19 = new JLabel();
         scrollPane4 = new JScrollPane();
-        list3 = new JList();
+        list3 = new JTable();
         label1 = new JLabel();
-        textField5 = new JTextField();
+        userName = new JTextField();
 
+        idCliente.setEditable(false);
+        roltxt.setText("CLIENT");
+        roltxt.setEditable(false);
+        idCar.setEditable(false);
+        userName.setEditable(false);
         //======== this ========
         setPreferredSize(new Dimension(750 , 650));
 
@@ -91,41 +253,41 @@ public class Admin extends JPanel {
                 //---- label7 ----
                 label7.setText("Telefono");
 
-                //---- label8 ----
-                label8.setText("Direccion");
-
                 //======== scrollPane2 ========
                 {
 
                     //---- table1 ----
                     table1.setModel(new DefaultTableModel(
                         new Object[][] {
-                            {null, null, null, null, null},
                         },
                         new String[] {
-                            "Nombre", "Correo", "Rol", "Telefono", "Direccion"
+                            "ID", "Nombre", "Correo", "Contrase\u00f1a", "Rol", "Telefono"
                         }
                     ));
+                    table1.setDefaultEditor(Object.class, null);
+                    table1.addMouseListener(new java.awt.event.MouseAdapter() {
+                        public void mouseClicked(java.awt.event.MouseEvent evt) {
+                            rellenaCamposconTablaCli();
+                        }
+                    });
                     scrollPane2.setViewportView(table1);
                 }
 
                 //---- button1 ----
                 button1.setText("Agregar");
+                button1.addActionListener(e -> agregarCliente());
 
                 //---- button2 ----
                 button2.setText("Eliminar");
-
-                //---- button3 ----
-                button3.setText("text");
-
-                //---- button4 ----
-                button4.setText("text");
+                button2.addActionListener(e -> eliminarCliente());
 
                 //---- button5 ----
                 button5.setText("Buscar");
+                button5.addActionListener(e -> buscarClienteTabla());
 
                 //---- button6 ----
                 button6.setText("limpiar");
+                button6.addActionListener(e -> limpiarCliente());
 
                 GroupLayout panel1Layout = new GroupLayout(panel1);
                 panel1.setLayout(panel1Layout);
@@ -142,21 +304,19 @@ public class Admin extends JPanel {
                                                 .addGroup(panel1Layout.createSequentialGroup()
                                                     .addComponent(label2, GroupLayout.PREFERRED_SIZE, 34, GroupLayout.PREFERRED_SIZE)
                                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
-                                                    .addComponent(textField6, GroupLayout.PREFERRED_SIZE, 146, GroupLayout.PREFERRED_SIZE))
+                                                    .addComponent(idCliente, GroupLayout.PREFERRED_SIZE, 146, GroupLayout.PREFERRED_SIZE))
                                                 .addComponent(label3)
                                                 .addComponent(label4)
-                                                .addComponent(textField7, GroupLayout.PREFERRED_SIZE, 254, GroupLayout.PREFERRED_SIZE)
-                                                .addComponent(textField8, GroupLayout.PREFERRED_SIZE, 254, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(nombreCliente, GroupLayout.PREFERRED_SIZE, 254, GroupLayout.PREFERRED_SIZE)
+                                                .addComponent(txtcorreoCliente, GroupLayout.PREFERRED_SIZE, 254, GroupLayout.PREFERRED_SIZE)
                                                 .addComponent(label5)
-                                                .addComponent(textField9, GroupLayout.PREFERRED_SIZE, 254, GroupLayout.PREFERRED_SIZE))
+                                                .addComponent(contraCliente, GroupLayout.PREFERRED_SIZE, 254, GroupLayout.PREFERRED_SIZE))
                                             .addGap(43, 43, 43)
                                             .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
                                                 .addComponent(label6)
                                                 .addComponent(label7)
-                                                .addComponent(textField11, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                                .addComponent(textField10, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                                .addComponent(label8)
-                                                .addComponent(textField12, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)))))
+                                                .addComponent(teltxt, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
+                                                .addComponent(roltxt, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)))))
                                 .addGroup(panel1Layout.createSequentialGroup()
                                     .addGap(46, 46, 46)
                                     .addComponent(button1)
@@ -164,8 +324,6 @@ public class Admin extends JPanel {
                                     .addComponent(button2)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                     .addGroup(panel1Layout.createParallelGroup()
-                                        .addComponent(button3)
-                                        .addComponent(button4)
                                         .addGroup(panel1Layout.createSequentialGroup()
                                             .addGap(12, 12, 12)
                                             .addComponent(button5)
@@ -178,7 +336,7 @@ public class Admin extends JPanel {
                         .addGroup(panel1Layout.createSequentialGroup()
                             .addGap(15, 15, 15)
                             .addGroup(panel1Layout.createParallelGroup()
-                                .addComponent(textField6, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(idCliente, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                                 .addComponent(label2))
                             .addGap(22, 22, 22)
                             .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
@@ -186,27 +344,25 @@ public class Admin extends JPanel {
                                 .addComponent(label6))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                             .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(textField10, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(textField7, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addComponent(roltxt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(nombreCliente, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(panel1Layout.createParallelGroup()
                                 .addGroup(panel1Layout.createSequentialGroup()
                                     .addComponent(label7)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
-                                    .addComponent(textField11, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                    .addComponent(teltxt, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                                 .addGroup(panel1Layout.createSequentialGroup()
                                     .addComponent(label4)
                                     .addGap(18, 18, 18)
-                                    .addComponent(textField8, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
+                                    .addComponent(txtcorreoCliente, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)))
                             .addGap(18, 18, 18)
                             .addGroup(panel1Layout.createParallelGroup()
-                                .addComponent(label8)
                                 .addGroup(panel1Layout.createSequentialGroup()
                                     .addComponent(label5)
                                     .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                                     .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                        .addComponent(textField9, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                        .addComponent(textField12, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))))
+                                        .addComponent(contraCliente, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED, GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
                             .addGroup(panel1Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(button1)
@@ -216,8 +372,7 @@ public class Admin extends JPanel {
                             .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                             .addGroup(panel1Layout.createParallelGroup()
                                 .addComponent(scrollPane2, GroupLayout.Alignment.TRAILING, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(button3, GroupLayout.Alignment.TRAILING)
-                                .addComponent(button4, GroupLayout.Alignment.TRAILING))
+                                )
                             .addContainerGap())
                 );
             }
@@ -249,15 +404,20 @@ public class Admin extends JPanel {
 
                 //---- button7 ----
                 button7.setText("Agregar");
+                button7.addActionListener(e -> agregarVehiculo());
 
                 //---- button8 ----
                 button8.setText("Eliminar");
+                button8.addActionListener(e -> eliminarVehiculo());
+
 
                 //---- button9 ----
                 button9.setText("Buscar");
+                button9.addActionListener(e -> buscarVehiculoTabla());
 
                 //---- button10 ----
                 button10.setText("Limpiar");
+                button10.addActionListener(e -> limpiarVehiculo());
 
                 //======== scrollPane3 ========
                 {
@@ -265,12 +425,17 @@ public class Admin extends JPanel {
                     //---- table2 ----
                     table2.setModel(new DefaultTableModel(
                         new Object[][] {
-                            {null, null, null, null, null, null, null},
                         },
                         new String[] {
-                            "Modelo", "Fabricante", "A\u00f1o", "Color", "Color", "Precio", "Cantidad"
+                            "ID", "Modelo", "Fabricante", "A\u00f1o", "Color", "Precio", "Cantidad"
                         }
                     ));
+                    table2.setDefaultEditor(Object.class, null);
+                    table2.addMouseListener(new java.awt.event.MouseAdapter() {
+                        public void mouseClicked(java.awt.event.MouseEvent evt) {
+                            rellenaCamposconTablaVeh();
+                        }
+                    });
                     scrollPane3.setViewportView(table2);
                 }
 
@@ -286,13 +451,13 @@ public class Admin extends JPanel {
                                         .addGroup(panel2Layout.createSequentialGroup()
                                             .addComponent(label12)
                                             .addGap(18, 18, 18)
-                                            .addComponent(textField15, GroupLayout.PREFERRED_SIZE, 163, GroupLayout.PREFERRED_SIZE))
+                                            .addComponent(idCar, GroupLayout.PREFERRED_SIZE, 163, GroupLayout.PREFERRED_SIZE))
                                         .addComponent(label13)
                                         .addComponent(label14)
-                                        .addComponent(textField17, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
+                                        .addComponent(fabriCar, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
                                         .addComponent(label15)
-                                        .addComponent(textField18, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                        .addComponent(textField16, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE))
+                                        .addComponent(annoCar, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
+                                        .addComponent(modelCar, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE))
                                     .addGroup(panel2Layout.createParallelGroup()
                                         .addGroup(panel2Layout.createSequentialGroup()
                                             .addGap(51, 51, 51)
@@ -303,9 +468,9 @@ public class Admin extends JPanel {
                                             .addGap(41, 41, 41)
                                             .addGroup(panel2Layout.createParallelGroup(GroupLayout.Alignment.LEADING, false)
                                                 .addComponent(label18)
-                                                .addComponent(textField20, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                                .addComponent(textField19, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
-                                                .addComponent(textField21, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)))))
+                                                .addComponent(carPrice, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
+                                                .addComponent(carColor, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)
+                                                .addComponent(carStock, GroupLayout.DEFAULT_SIZE, 254, Short.MAX_VALUE)))))
                                 .addGroup(panel2Layout.createSequentialGroup()
                                     .addGap(64, 64, 64)
                                     .addComponent(button7)
@@ -326,31 +491,31 @@ public class Admin extends JPanel {
                             .addGap(14, 14, 14)
                             .addGroup(panel2Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(label12)
-                                .addComponent(textField15, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addComponent(idCar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(panel2Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(label13)
                                 .addComponent(label16))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(panel2Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(textField16, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(textField19, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addComponent(modelCar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(carColor, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                             .addGroup(panel2Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(label14)
                                 .addComponent(label17))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                             .addGroup(panel2Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
-                                .addComponent(textField17, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(textField20, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addComponent(fabriCar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(carPrice, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addGap(18, 18, 18)
                             .addGroup(panel2Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(label15)
                                 .addComponent(label18))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.RELATED)
                             .addGroup(panel2Layout.createParallelGroup()
-                                .addComponent(textField18, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
-                                .addComponent(textField21, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
+                                .addComponent(annoCar, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                                .addComponent(carStock, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE))
                             .addPreferredGap(LayoutStyle.ComponentPlacement.UNRELATED)
                             .addGroup(panel2Layout.createParallelGroup(GroupLayout.Alignment.BASELINE)
                                 .addComponent(button10)
@@ -372,6 +537,15 @@ public class Admin extends JPanel {
 
                 //======== scrollPane4 ========
                 {
+                    //table 3
+                    list3.setModel(new DefaultTableModel(
+                        new Object[][] {
+                        },
+                        new String[] {
+                            "Cliente", "Vehiculo", "Fecha", "Total", "Metodo de pago"
+                        }
+                    ));
+                    list3.setDefaultEditor(Object.class, null);
                     scrollPane4.setViewportView(list3);
                 }
 
@@ -412,7 +586,7 @@ public class Admin extends JPanel {
                     .addContainerGap()
                     .addGroup(layout.createParallelGroup()
                         .addComponent(label1)
-                        .addComponent(textField5, GroupLayout.PREFERRED_SIZE, 168, GroupLayout.PREFERRED_SIZE)
+                        .addComponent(userName, GroupLayout.PREFERRED_SIZE, 168, GroupLayout.PREFERRED_SIZE)
                         .addComponent(tabbedPane1, GroupLayout.PREFERRED_SIZE, 698, GroupLayout.PREFERRED_SIZE))
                     .addContainerGap(11, Short.MAX_VALUE))
         );
@@ -422,28 +596,31 @@ public class Admin extends JPanel {
                     .addGap(16, 16, 16)
                     .addComponent(label1)
                     .addGap(3, 3, 3)
-                    .addComponent(textField5, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
+                    .addComponent(userName, GroupLayout.PREFERRED_SIZE, GroupLayout.DEFAULT_SIZE, GroupLayout.PREFERRED_SIZE)
                     .addGap(18, 18, 18)
                     .addComponent(tabbedPane1, GroupLayout.PREFERRED_SIZE, 528, GroupLayout.PREFERRED_SIZE)
                     .addContainerGap(23, Short.MAX_VALUE))
         );
+        tablaClientes();
+        tablaVentas();
+        tablaVehiculos();
     }
     private JTabbedPane tabbedPane1;
     private JPanel panel1;
     private JLabel label2;
-    private JTextField textField6;
+    private JTextField idCliente;
     private JLabel label3;
-    private JTextField textField7;
+    private JTextField nombreCliente;
     private JLabel label4;
-    private JTextField textField8;
+    private JTextField txtcorreoCliente;
     private JLabel label5;
-    private JTextField textField9;
+    private JTextField contraCliente;
     private JLabel label6;
-    private JTextField textField10;
+    private JTextField roltxt;
     private JLabel label7;
-    private JTextField textField11;
+    private JTextField teltxt;
     private JLabel label8;
-    private JTextField textField12;
+    private JTextField diretxt;
     private JScrollPane scrollPane2;
     private JTable table1;
     private JButton button1;
@@ -454,19 +631,19 @@ public class Admin extends JPanel {
     private JButton button6;
     private JPanel panel2;
     private JLabel label12;
-    private JTextField textField15;
+    private JTextField idCar;
     private JLabel label13;
-    private JTextField textField16;
+    private JTextField modelCar;
     private JLabel label14;
-    private JTextField textField17;
+    private JTextField fabriCar;
     private JLabel label15;
-    private JTextField textField18;
+    private JTextField annoCar;
     private JLabel label16;
-    private JTextField textField19;
+    private JTextField carColor;
     private JLabel label17;
-    private JTextField textField20;
+    private JTextField carPrice;
     private JLabel label18;
-    private JTextField textField21;
+    private JTextField carStock;
     private JButton button7;
     private JButton button8;
     private JButton button9;
@@ -476,8 +653,9 @@ public class Admin extends JPanel {
     private JPanel panel3;
     private JLabel label19;
     private JScrollPane scrollPane4;
-    private JList list3;
+    private JTable list3;
     private JLabel label1;
-    private JTextField textField5;
+    private JTextField userName;
+    private User user;
 
 }

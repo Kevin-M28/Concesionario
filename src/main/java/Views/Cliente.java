@@ -1,7 +1,14 @@
 
 package Views;
 
+import DAO.ClientDao;
+import DAO.SaleDao;
+import DAO.VehicleDao;
 import Models.Client;
+import JPA.JPAUtils;
+import Models.Sale;
+import Models.Vehicle;
+import java.util.List;
 
 import javax.swing.*;
 import javax.swing.GroupLayout;
@@ -16,16 +23,48 @@ public class Cliente extends JPanel {
         this.client = client;
         nombreUser.setText(client.getUsername());
     }
-    void llenarTabla(){
-        DefaultTableModel model = (DefaultTableModel) table1.getModel();
+    public void llenarTablaHisorial(){
+        if (client.getSales_hisory() != null) {
+            DefaultTableModel model = (DefaultTableModel) table1.getModel();
+            model.setRowCount(0);
+            for (int i = 0; i < client.getSales_hisory().size(); i++) {
+                model.addRow(new Object[]{client.getSales_hisory().get(i).getId(), client.getSales_hisory().get(i).getVehicle().getModel(), client.getSales_hisory().get(i).getDate(), client.getSales_hisory().get(i).getTotal(), client.getSales_hisory().get(i).getPayment_method()});
+            }
+        }
+
+    }
+
+    public void  llenarTablaVehiculos(){
+        DefaultTableModel model = (DefaultTableModel) table2.getModel();
         model.setRowCount(0);
-        for (int i = 0; i < client.getSales_hisory().size(); i++) {
-            model.addRow(new Object[]{client.getSales_hisory().get(i).getId(), client.getSales_hisory().get(i).getVehicle().getModel(), client.getSales_hisory().get(i).getDate(), client.getSales_hisory().get(i).getTotal(), client.getSales_hisory().get(i).getPayment_method()});
+        VehicleDao vehicleDao = new VehicleDao(new JPAUtils().getEntityManager());
+        List<Vehicle> vehicles = vehicleDao.getVehicles();
+        for (int i = 0; i < vehicles.size(); i++) {
+            if (vehicles.get(i).getStock() > 0) {
+                model.addRow(new Object[]{vehicles.get(i).getId(), vehicles.get(i).getModel(), vehicles.get(i).getFabricant(), vehicles.get(i).getYear(), vehicles.get(i).getColor(), vehicles.get(i).getPrice()});
+            }
+        }
+    }
+    public void comprar(){
+        int id = (int) table2.getValueAt(table2.getSelectedRow(), 0);
+        VehicleDao vehicleDao = new VehicleDao(new JPAUtils().getEntityManager());
+        Vehicle vehicle = vehicleDao.getVehicle(id);
+        SaleDao saleDao = new SaleDao(new JPAUtils().getEntityManager());
+        Sale sale = new Sale(client, vehicle, "2021-05-05", vehicle.getPrice(), JcomboboxPago.getSelectedItem().toString());
+        saleDao.saveSale(sale);
+        if (vehicle.getStock() > 0) {
+            vehicle.setStock(vehicle.getStock() - 1);
+            vehicleDao.updateVehicle(vehicle);
+            client.getSales_hisory().add(sale);
+            ClientDao clientDao = new ClientDao(new JPAUtils().getEntityManager());
+            clientDao.updateClient(client);
+            llenarTablaHisorial();
+            llenarTablaVehiculos();
         }
     }
     private void initComponents() {
-        setPreferredSize(new Dimension(750 , 650));
         client = new Client();
+        setPreferredSize(new Dimension(750 , 650));
         tabbedPane1 = new JTabbedPane();
         panel1 = new JPanel();
         panel2 = new JPanel();
@@ -54,14 +93,16 @@ public class Cliente extends JPanel {
                     //---- table1 ----
                     table1.setModel(new DefaultTableModel(
                         new Object[][] {
-                            {null, null, null, null, null},
+
                         },
                         new String[] {
                             "ID", "Vehiculo", "Fecha", "Total", "Forma de pago"
                         }
                     ));
+                    table1.setDefaultEditor(Object.class, null);
                     scrollPane1.setViewportView(table1);
                 }
+
 
                 GroupLayout panel1Layout = new GroupLayout(panel1);
                 panel1.setLayout(panel1Layout);
@@ -90,15 +131,16 @@ public class Cliente extends JPanel {
                     //---- table2 ----
                     table2.setModel(new DefaultTableModel(
                         new Object[][] {
-                            {null, null, null, null, null, null},
                         },
                         new String[] {
                             "ID", "Modelo", "fabricante", "A\u00f1o", "Color", "Precio"
                         }
                     ));
+                    table2.setDefaultEditor(Object.class, null);
                     scrollPane2.setViewportView(table2);
-                }
 
+                }
+                llenarTablaVehiculos();
                 //---- label2 ----
                 label2.setText("Forma de pago");
 
@@ -167,6 +209,8 @@ public class Cliente extends JPanel {
                     .addComponent(tabbedPane1, GroupLayout.PREFERRED_SIZE, 434, GroupLayout.PREFERRED_SIZE)
                     .addContainerGap(17, Short.MAX_VALUE))
         );
+        button1.addActionListener(e -> comprar());
+
     }
 
     private JTabbedPane tabbedPane1;

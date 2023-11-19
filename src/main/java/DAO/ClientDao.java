@@ -3,6 +3,8 @@ package DAO;
 import Models.Client;
 import jakarta.persistence.EntityManager;
 
+import java.util.List;
+
 public class ClientDao {
 
     EntityManager em;
@@ -36,6 +38,16 @@ public class ClientDao {
     public Client getClientbyUsername(String username) {
         return (Client) em.createQuery("SELECT c FROM Client c WHERE c.username = :username")
                 .setParameter("username", username)
+                .getSingleResult();
+    }
+
+    public List<Client> getClients() {
+        return em.createQuery("SELECT c FROM Client c").getResultList();
+    }
+
+    public Client getClientNombre(String nombre) {
+        return (Client) em.createQuery("SELECT c FROM Client c WHERE c.username = :nombre")
+                .setParameter("nombre", nombre)
                 .getSingleResult();
     }
 }
