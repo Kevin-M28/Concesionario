@@ -3,6 +3,8 @@ package DAO;
 import Models.User;
 import jakarta.persistence.EntityManager;
 
+import java.util.List;
+
 public class UserDao {
     private EntityManager em;
 
@@ -30,5 +32,17 @@ public class UserDao {
 
     public User getUser(int id) {
         return em.find(User.class, id);
+    }
+
+    //busca usuario por nombre y contraseña
+    public User getUser(String username, String password) {
+        return (User) em.createQuery("SELECT u FROM User u WHERE u.username = :username AND u.password = :password")
+                .setParameter("username", username)
+                .setParameter("password", password)
+                .getSingleResult();
+    }
+
+    public List<User> getUsers() {
+        return em.createQuery("SELECT u FROM User u").getResultList();
     }
 }

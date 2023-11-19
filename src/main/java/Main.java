@@ -1,19 +1,22 @@
 import DAO.UserDao;
 import JPA.JPAUtils;
-import Models.Role;
-import Models.User;
 import jakarta.persistence.EntityManager;
+import Models.*;
+import DAO.*;
+import Views.*;
+
+import javax.swing.*;
 
 public class Main {
     public static void main(String[] args) {
-
-        User user = new User("Kevin2", "1232","kef2@gmail.com",Role.CLIENT);
-        try (JPAUtils jpaUtils = new JPAUtils()){
-            UserDao userDao = new UserDao((jpaUtils.getEntityManager()));
-            userDao.saveUser(user);
-        }catch (Exception e){
-            System.out.println("Error: "+e.getMessage());
-        }
-
+        JFrame frame = new JFrame("Main");
+        frame.setContentPane(new Login());
+        frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
+        frame.setSize(500, 500);
+        frame.setVisible(true);
+/*
+        UserDao userDao = new UserDao(new JPAUtils().getEntityManager());
+        userDao.saveUser(new User("admin", "admin", "admin@gmail.com", Role.ADMIN));
+*/
     }
 }

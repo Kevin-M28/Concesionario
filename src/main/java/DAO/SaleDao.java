@@ -4,6 +4,8 @@ package DAO;
 import Models.Sale;
 import jakarta.persistence.EntityManager;
 
+import java.util.List;
+
 public class SaleDao {
 
     EntityManager em;
@@ -32,6 +34,10 @@ public class SaleDao {
 
     public Sale getSale(int id) {
         return em.find(Sale.class, id);
+    }
+
+    public List<Sale> getSales() {
+        return em.createQuery("SELECT s FROM Sale s").getResultList();
     }
 
 }

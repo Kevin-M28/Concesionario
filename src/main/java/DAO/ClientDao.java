@@ -32,4 +32,10 @@ public class ClientDao {
     public Client getClient(int id) {
         return em.find(Client.class, id);
     }
+
+    public Client getClientbyUsername(String username) {
+        return (Client) em.createQuery("SELECT c FROM Client c WHERE c.username = :username")
+                .setParameter("username", username)
+                .getSingleResult();
+    }
 }
