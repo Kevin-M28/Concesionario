@@ -11,7 +11,7 @@ import java.util.List;
 public class Client extends User {
     private String telephone;
 
-    @OneToMany(mappedBy = "client")
+    @OneToMany(mappedBy = "client", targetEntity = Sale.class)
     private List<Sale> sales_hisory;
     public Client() {
         super();

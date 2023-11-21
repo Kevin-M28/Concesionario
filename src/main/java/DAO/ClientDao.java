@@ -26,7 +26,11 @@ public class ClientDao {
     }
 
     public void deleteClient(Client client) {
+
         em.getTransaction().begin();
+        em.createQuery("DELETE FROM Sale s WHERE s.client = :user")
+                .setParameter("user", client)
+                .executeUpdate();
         em.remove(client);
         em.getTransaction().commit();
     }

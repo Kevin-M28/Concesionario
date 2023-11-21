@@ -25,6 +25,8 @@ public class UserDao {
     }
 
     public void deleteUser(User user) {
+        //elimina todas las ventas del usuario
+
         em.getTransaction().begin();
         em.remove(user);
         em.getTransaction().commit();

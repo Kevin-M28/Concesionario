@@ -16,7 +16,7 @@ public class SaleDao {
 
     public void saveSale(Sale sale) {
         em.getTransaction().begin();
-        em.persist(sale);
+        em.merge(sale);
         em.getTransaction().commit();
     }
 

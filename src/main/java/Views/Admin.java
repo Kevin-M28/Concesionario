@@ -23,7 +23,7 @@ public class Admin extends JPanel {
     public void agregarCliente(){
 
         ClientDao clientDao = new ClientDao(new JPAUtils().getEntityManager());
-        Client client = (idCliente.getText().isEmpty())? new Client(nombreCliente.getText(), txtcorreoCliente.getText(), contraCliente.getText(), Role.CLIENT, teltxt.getText()): clientDao.getClient(Integer.parseInt( idCliente.getText()));
+        Client client = (idCliente.getText().isEmpty())? new Client(nombreCliente.getText(), contraCliente.getText(),txtcorreoCliente.getText() , Role.CLIENT, teltxt.getText()): clientDao.getClient(Integer.parseInt( idCliente.getText()));
         if(idCliente.getText().isEmpty()){
             clientDao.saveClient(client);
             JOptionPane.showMessageDialog(null, "Cliente agregado");
@@ -65,7 +65,9 @@ public class Admin extends JPanel {
         if (idCliente.getText().isEmpty() || clientDao.getClient(Integer.parseInt(idCliente.getText())) == null) {
             JOptionPane.showMessageDialog(null, "Cliente no encontrado o no ha seleccionado uno");
         }else {
+            System.out.println(clientDao.getClient(Integer.parseInt(idCliente.getText())).toString());
             clientDao.deleteClient(clientDao.getClient(Integer.parseInt(idCliente.getText())));
+
             JOptionPane.showMessageDialog(null, "Cliente eliminado");
         }
         limpiarCliente();

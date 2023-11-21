@@ -14,9 +14,9 @@ public class Main {
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         frame.setSize(500, 500);
         frame.setVisible(true);
-/*
-        UserDao userDao = new UserDao(new JPAUtils().getEntityManager());
-        userDao.saveUser(new User("admin", "admin", "admin@gmail.com", Role.ADMIN));
-*/
+
+        /*UserDao userDao = new UserDao(new JPAUtils().getEntityManager());
+        userDao.saveUser(new User("admin", "admin", "admin@gmail.com", Role.ADMIN));}
+         */
     }
 }
